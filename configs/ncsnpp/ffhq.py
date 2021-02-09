@@ -33,7 +33,7 @@ def get_config():
   training.sde = 'vesde'
   training.continuous = True
   training.likelihood_weighting = False
-  training.n_jitted_steps = 2
+  training.n_jitted_steps = 1
   training.reduce_mean = True
 
   # sampling
