@@ -137,14 +137,7 @@ def get_dataset(config, additional_dim=None, uniform_dequantization=False, evalu
         img = tf.image.convert_image_dtype(img, tf.float32)
         return img
 
-  elif config.data.dataset == 'CelebAHQ':
-    dataset_builder = tfds.builder('celeb_a_hq')
-    train_split_name = eval_split_name = 'train'
-
-    def resize_op(img):
-      return tf.image.convert_image_dtype(img, tf.float32)
-
-  elif config.data.dataset == 'FFHQ':
+  elif config.data.dataset in ['FFHQ', 'CelebAHQ']:
     dataset_builder = tf.data.TFRecordDataset(config.data.tfrecords_path)
     train_split_name = eval_split_name = 'train'
 
@@ -153,7 +146,7 @@ def get_dataset(config, additional_dim=None, uniform_dequantization=False, evalu
       f'Dataset {config.data.dataset} not yet supported.')
 
   # Customize preprocess functions for each dataset.
-  if config.data.dataset == 'FFHQ':
+  if config.data.dataset in ['FFHQ', 'CelebAHQ']:
     def preprocess_fn(d):
       sample = tf.io.parse_single_example(d, features={
         'shape': tf.io.FixedLenFeature([3], tf.int64),

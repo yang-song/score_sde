@@ -38,6 +38,8 @@ def get_config():
   data = config.data
   data.dataset = 'CelebAHQ'
   data.centered = True
+  data.tfrecords_path = '/atlas/u/yangsong/celeba_hq/-r10.tfrecords'
+  data.image_size = 256
 
   # model
   model = config.model
