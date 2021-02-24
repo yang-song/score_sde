@@ -180,13 +180,16 @@ def get_score_fn(sde, model, params, states, train=False, continuous=False, retu
 
   if isinstance(sde, sde_lib.VPSDE) or isinstance(sde, sde_lib.subVPSDE):
     def score_fn(x, t, rng=None):
-      # For VP-trained models, t=0 corresponds to the lowest noise level
-      labels = t * (sde.N - 1)
       # Scale neural network output by standard deviation and flip sign
-      model, state = model_fn(x, labels, rng)
       if continuous or isinstance(sde, sde_lib.subVPSDE):
+        # For VP-trained models, t=0 corresponds to the lowest noise level
+        labels = t * 999
+        model, state = model_fn(x, labels, rng)
         std = sde.marginal_prob(jnp.zeros_like(x), t)[1]
       else:
+        # For VP-trained models, t=0 corresponds to the lowest noise level
+        labels = t * (sde.N - 1)
+        model, state = model_fn(x, labels, rng)
         std = sde.sqrt_1m_alphas_cumprod[labels.astype(jnp.int32)]
 
       score = batch_mul(-model, 1. / std)
