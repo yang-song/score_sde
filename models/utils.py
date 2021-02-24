@@ -183,6 +183,8 @@ def get_score_fn(sde, model, params, states, train=False, continuous=False, retu
       # Scale neural network output by standard deviation and flip sign
       if continuous or isinstance(sde, sde_lib.subVPSDE):
         # For VP-trained models, t=0 corresponds to the lowest noise level
+        # The maximum value of time embedding is assumed to 999 for
+        # continuously-trained models.
         labels = t * 999
         model, state = model_fn(x, labels, rng)
         std = sde.marginal_prob(jnp.zeros_like(x), t)[1]
