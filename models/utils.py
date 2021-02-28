@@ -152,11 +152,11 @@ def get_model_fn(model, params, states, train=False):
       return model.apply(variables, x, labels, train=False, mutable=False), states
     else:
       rngs = {'dropout': rng}
-      outputs = model.apply(variables, x, labels, train=True, mutable=list(states.keys()), rngs=rngs)
-      if states:
-        return outputs
-      else:
-        return outputs, states
+      return model.apply(variables, x, labels, train=True, mutable=list(states.keys()), rngs=rngs)
+      # if states:
+      #   return outputs
+      # else:
+      #   return outputs, states
 
   return model_fn
 
