@@ -31,6 +31,8 @@ flags.DEFINE_string("workdir", None, "Work directory.")
 flags.DEFINE_enum("mode", None, ["train", "eval","fid_stats"], "Running mode: train or eval or fid_stats")
 flags.DEFINE_string("eval_folder", "eval",
                     "The folder name for storing evaluation results")
+flags.DEFINE_string("fid_folder", "assets/stats",
+                    "The folder name for storing FID statistics")
 flags.mark_flags_as_required(["workdir", "config", "mode"])
 
 
