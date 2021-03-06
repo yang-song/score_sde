@@ -68,7 +68,7 @@ def central_crop(image, size):
   return tf.image.crop_to_bounding_box(image, top, left, size, size)
 
 
-def get_dataset(config, additional_dim=None, uniform_dequantization=False, evaluation=False):
+def get_dataset(config, additional_dim=None, uniform_dequantization=False, evaluation=False, drop_remainder=True):
   """Create data loaders for training and evaluation.
 
   Args:
@@ -198,7 +198,7 @@ def get_dataset(config, additional_dim=None, uniform_dequantization=False, evalu
     ds = ds.shuffle(shuffle_buffer_size)
     ds = ds.map(preprocess_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
     for batch_size in reversed(batch_dims):
-      ds = ds.batch(batch_size, drop_remainder=True)
+      ds = ds.batch(batch_size, drop_remainder=drop_remainder)
     return ds.prefetch(prefetch_size)
 
   train_ds = create_dataset(dataset_builder, train_split_name)

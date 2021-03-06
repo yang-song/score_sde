@@ -596,12 +596,10 @@ def fid_stats(config,
   # Build data pipeline
   train_ds, eval_ds, dataset_builder = datasets.get_dataset(config,
                                               additional_dim=None,
-                                              uniform_dequantization=config.data.uniform_dequantization,
-                                              evaluation=True)
+                                              uniform_dequantization=False,
+                                              evaluation=True,
+                                              drop_remainder=False)
   bpd_iter = iter(train_ds)
-
-  # Create data normalizer and its inverse
-  scaler = datasets.get_data_scaler(config)
 
   # Use inceptionV3 for images with resolution higher than 256.
   inceptionv3 = config.data.image_size >= 256
@@ -615,8 +613,8 @@ def fid_stats(config,
     if jax.host_id() == 0:
       logging.info("Making FID stats -- step: %d" % (batch_id))
 
-    batch_ = jax.tree_map(lambda x: scaler(x._numpy()), batch)
-    batch_ = batch_['image'].reshape((-1, config.data.image_size, config.data.image_size, 3))
+    batch_ = jax.tree_map(lambda x: x._numpy(), batch)
+    batch_ = (batch_['image']*255).astype(np.uint8).reshape((-1, config.data.image_size, config.data.image_size, 3))
 
     # Force garbage collection before calling TensorFlow code for Inception network
     gc.collect()
