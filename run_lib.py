@@ -602,12 +602,6 @@ def fid_stats(config,
 
   # Create data normalizer and its inverse
   scaler = datasets.get_data_scaler(config)
-  inverse_scaler = datasets.get_data_inverse_scaler(config)
-  try: # Set the number of classes if info exists
-    config.model.num_classes = dataset_builder.info.features['label'].num_classes
-  except:
-    config.model.num_classes = 1
-  assert not config.model.class_conditional or (config.model.class_conditional and config.model.num_classes > 1)
 
   # Use inceptionV3 for images with resolution higher than 256.
   inceptionv3 = config.data.image_size >= 256
