@@ -580,3 +580,68 @@ def evaluate(config,
     os.path.join(eval_dir, f"meta_{jax.host_id()}_*"))
   for file in meta_files:
     tf.io.gfile.remove(file)
+
+# Create FID stats by looping through the whole data
+def fid_stats(config,
+             fid_folder="assets/stats"):
+  """Evaluate trained models.
+
+  Args:
+    config: Configuration to use.
+    fid_folder: The subfolder for storing fid statistics. 
+  """
+  # Create directory to eval_folder
+  #fid_dir = os.path.join(workdir, fid_folder)
+  fid_dir = fid_folder
+  tf.io.gfile.makedirs(fid_dir)
+
+  # Build data pipeline
+  train_ds, eval_ds, dataset_builder = datasets.get_dataset(config,
+                                              additional_dim=None,
+                                              uniform_dequantization=config.data.uniform_dequantization,
+                                              evaluation=True)
+  bpd_iter = iter(train_ds)
+
+  # Create data normalizer and its inverse
+  scaler = datasets.get_data_scaler(config)
+  inverse_scaler = datasets.get_data_inverse_scaler(config)
+  try: # Set the number of classes if info exists
+    config.model.num_classes = dataset_builder.info.features['label'].num_classes
+  except:
+    config.model.num_classes = 1
+  assert not config.model.class_conditional or (config.model.class_conditional and config.model.num_classes > 1)
+
+  # Use inceptionV3 for images with resolution higher than 256.
+  inceptionv3 = config.data.image_size >= 256
+  inception_model = evaluation.get_inception_model(inceptionv3=inceptionv3)
+
+  all_pools = []
+  for batch_id in range(len(train_ds)):
+
+    batch = next(bpd_iter)
+
+    if jax.host_id() == 0:
+      logging.info("Making FID stats -- step: %d" % (batch_id))
+
+    batch_ = jax.tree_map(lambda x: scaler(x._numpy()), batch)
+    batch_ = batch_['image'].reshape((-1, config.data.image_size, config.data.image_size, 3))
+
+    # Force garbage collection before calling TensorFlow code for Inception network
+    gc.collect()
+    latents = evaluation.run_inception_distributed(batch_, inception_model,
+                                                   inceptionv3=inceptionv3)
+    all_pools.append(latents["pool_3"])
+    # Force garbage collection again before returning to JAX code
+    gc.collect()
+
+  all_pools = np.concatenate(all_pools, axis=0) # Combine into one
+
+  # Save latent represents of the Inception network to disk or Google Cloud Storage
+  filename = f'{config.data.dataset.lower()}_{config.data.image_size}_stats.npz'
+  with tf.io.gfile.GFile(
+      os.path.join(fid_dir, filename), "wb") as fout:
+    io_buffer = io.BytesIO()
+    np.savez_compressed(
+      io_buffer, pool_3=all_pools)
+    fout.write(io_buffer.getvalue())
+
