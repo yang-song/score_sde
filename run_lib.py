@@ -583,16 +583,14 @@ def evaluate(config,
 
 # Create FID stats by looping through the whole data
 def fid_stats(config,
-             fid_folder="assets/stats"):
+             fid_dir="assets/stats"):
   """Evaluate trained models.
 
   Args:
     config: Configuration to use.
-    fid_folder: The subfolder for storing fid statistics. 
+    fid_dir: The subfolder for storing fid statistics. 
   """
   # Create directory to eval_folder
-  #fid_dir = os.path.join(workdir, fid_folder)
-  fid_dir = fid_folder
   tf.io.gfile.makedirs(fid_dir)
 
   # Build data pipeline
