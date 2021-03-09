@@ -91,7 +91,6 @@ def get_dataset(config, additional_dim=None, uniform_dequantization=False, evalu
   # Reduce this when image resolution is too large and data pointer is stored
   shuffle_buffer_size = 10000
   prefetch_size = tf.data.experimental.AUTOTUNE
-  num_epochs = None if not evaluation else 1
   # Create additional data dimension when jitting multiple steps together
   if additional_dim is None:
     batch_dims = [jax.local_device_count(), per_device_batch_size]
@@ -194,7 +193,7 @@ def get_dataset(config, additional_dim=None, uniform_dequantization=False, evalu
         split=split, shuffle_files=True, read_config=read_config)
     else:
       ds = dataset_builder.with_options(dataset_options)
-    ds = ds.repeat(count=num_epochs)
+    ds = ds.repeat()
     ds = ds.shuffle(shuffle_buffer_size)
     ds = ds.map(preprocess_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
     for batch_size in reversed(batch_dims):
