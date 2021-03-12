@@ -276,7 +276,7 @@ class NCSNv2_128(nn.Module):  # pylint: disable=invalid-name
 
 @register_model(name='ncsnv2_256')
 class NCSNv2_256(nn.Module):  # pylint: disable=invalid-name
-  """NCSNv2 model architecture for 128px images."""
+  """NCSNv2 model architecture for 256px images."""
   config: ml_collections.ConfigDict
 
   @nn.compact

@@ -391,7 +391,8 @@ def get_pc_sampler(sde, model, shape, predictor, corrector, inverse_scaler, snr,
     eps: A `float` number. The reverse-time SDE and ODE are integrated to `epsilon` to avoid numerical issues.
 
   Returns:
-    A sampling function that takes random states, and a replcated training state and returns samples.
+    A sampling function that takes random states, and a replcated training state and returns samples as well as
+    the number of function evaluations during sampling.
   """
   # Create predictor & corrector update functions
   predictor_update_fn = functools.partial(shared_predictor_update_fn,
@@ -414,7 +415,7 @@ def get_pc_sampler(sde, model, shape, predictor, corrector, inverse_scaler, snr,
       rng: A JAX random state
       state: A `flax.struct.dataclass` object that represents the training state of a score-based model.
     Returns:
-      Samples
+      Samples, number of function evaluations
     """
     # Initial sample
     rng, step_rng = random.split(rng)
@@ -455,7 +456,8 @@ def get_ode_sampler(sde, model, shape, inverse_scaler,
     eps: A `float` number. The reverse-time SDE/ODE will be integrated to `eps` for numerical stability.
 
   Returns:
-    A sampling function that takes random states, and a replicated training state and returns samples.
+    A sampling function that takes random states, and a replicated training state and returns samples
+    as well as the number of function evaluations during sampling.
   """
 
   @jax.pmap
@@ -481,6 +483,8 @@ def get_ode_sampler(sde, model, shape, inverse_scaler,
       prng: An array of random state. The leading dimension equals the number of devices.
       pstate: Replicated training state for running on multiple devices.
       z: If present, generate samples from latent code `z`.
+    Returns:
+      Samples, and the number of function evaluations.
     """
     # Initial sample
     rng = flax.jax_utils.unreplicate(prng)

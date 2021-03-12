@@ -4,6 +4,7 @@ import jax
 import jax.random as random
 from sampling import NoneCorrector, NonePredictor, shared_corrector_update_fn, shared_predictor_update_fn
 import functools
+from utils import batch_mul
 
 
 def get_pc_inpainter(sde, model, predictor, corrector, inverse_scaler, snr,
@@ -50,7 +51,7 @@ def get_pc_inpainter(sde, model, predictor, corrector, inverse_scaler, snr,
       vec_t = jnp.ones(data.shape[0]) * t
       x, x_mean = update_fn(step_rng, state, x, vec_t)
       masked_data_mean, std = sde.marginal_prob(data, vec_t)
-      masked_data = masked_data_mean + jax.random.normal(rng, x.shape) * std[:, None, None, None]
+      masked_data = masked_data_mean + batch_mul(jax.random.normal(rng, x.shape), std)
       x = x * (1. - mask) + masked_data * mask
       x_mean = x * (1. - mask) + masked_data_mean * mask
       return x, x_mean
@@ -155,7 +156,7 @@ def get_pc_colorizer(sde, model, predictor, corrector, inverse_scaler,
       vec_t = jnp.ones(x.shape[0]) * t
       x, x_mean = update_fn(step_rng, state, x, vec_t)
       masked_data_mean, std = sde.marginal_prob(decouple(gray_scale_img), vec_t)
-      masked_data = masked_data_mean + jax.random.normal(rng, x.shape) * std[:, None, None, None]
+      masked_data = masked_data_mean + batch_mul(jax.random.normal(rng, x.shape), std)
       x = couple(decouple(x) * (1. - mask) + masked_data * mask)
       x_mean = couple(decouple(x) * (1. - mask) + masked_data_mean * mask)
       return x, x_mean

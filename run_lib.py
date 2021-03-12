@@ -160,7 +160,7 @@ def train(config, workdir):
     (_, pstate), ploss = p_train_step((next_rng, pstate), batch)
     loss = flax.jax_utils.unreplicate(ploss).mean()
     # Log to console, file and tensorboard on host 0
-    if jax.host_id() == 0 and step % 50 == 0:
+    if jax.host_id() == 0 and step % config.training.log_freq == 0:
       logging.info("step: %d, training_loss: %.5e" % (step, loss))
       writer.scalar("training_loss", loss, step)
 
@@ -456,7 +456,7 @@ def evaluate(config,
         samples, n = sampling_fn(sample_rng, pstate)
         samples = np.clip(samples * 255., 0, 255).astype(np.uint8)
         samples = samples.reshape(
-          (-1, config.data.image_size, config.data.image_size, 3))
+          (-1, config.data.image_size, config.data.image_size, config.data.num_channels))
         # Write samples to disk or Google Cloud Storage
         with tf.io.gfile.GFile(
             os.path.join(this_sample_dir, f"samples_{r}.npz"), "wb") as fout:

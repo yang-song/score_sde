@@ -53,7 +53,8 @@ def get_likelihood_fn(sde, model, inverse_scaler, hutchinson_type='Rademacher',
 
   Returns:
     A function that takes random states, replicated training states, and a batch of data points
-      and returns the log-likelihoods in bits/dim.
+      and returns the log-likelihoods in bits/dim, the latent code, and the number of function
+      evaluations cost by computation.
   """
 
   def drift_fn(state, x, t):
