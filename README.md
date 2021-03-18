@@ -21,9 +21,11 @@ Aside from the **NCSN++** and **DDPM++** models in our paper, this codebase also
 
 It supports training new models, evaluating the sample quality and likelihoods of existing models. We carefully designed the code to be modular and easily extensible to new SDEs, predictors, or correctors.
 
+## PyTorch version
 
+Please find a PyTorch implementation [here](https://github.com/yang-song/score_sde_pytorch), which supports everything except class-conditional generation with a pre-trained classifier.
 
-## JAX vs. PyTorch
+###  JAX vs. PyTorch
 
 In general, the PyTorch version consumes less memory but also runs slower than JAX. Here is a benchmark on training an NCSN++ cont. model with VE SDE. Hardware is 4x Nvidia Tesla V100 GPUs (32GB)
 | Framework | Time (second per step) | Memory usage in total (GB) |
