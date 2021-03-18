@@ -117,12 +117,14 @@ def get_pc_colorizer(sde, model, predictor, corrector, inverse_scaler,
 
   # `M` is an orthonormal matrix to decouple image space to a latent space where the gray-scale image
   # occupies a separate channel
-  M = jnp.asarray([[1 / 3, 1 / 3, 1 / 3], [1 / 3, 0, 0], [0, 1 / 3, 0]])
-  # `invM` is the inverse transformation of `M`
-  invM = jnp.asarray([[0, 3, 0], [0, 0, 3], [3, -3, -3]])
   M = jnp.asarray([[5.7735014e-01, -8.1649649e-01, 4.7008697e-08],
                    [5.7735026e-01, 4.0824834e-01, 7.0710671e-01],
                    [5.7735026e-01, 4.0824822e-01, -7.0710683e-01]])
+  # M = jnp.asarray([[0.28361226, 0.95408977, 0.09631611],
+  #                  [0.95408977, -0.29083936, 0.07159032],
+  #                  [0.09631611, 0.07159032, -0.9927729]])
+
+  # `invM` is the inverse transformation of `M`
   invM = jnp.linalg.inv(M)
 
   # Decouple a gray-scale image with `M`

@@ -59,20 +59,17 @@ class DDPM(nn.Module):
     resamp_with_conv = config.model.resamp_with_conv
     num_resolutions = len(ch_mult)
 
-    # timestep/scale embedding
-    timesteps = labels
-    temb = layers.get_timestep_embedding(timesteps, nf)
-    temb = nn.Dense(nf * 4, kernel_init=default_initializer())(temb)
-    temb = nn.Dense(nf * 4, kernel_init=default_initializer())(act(temb))
-
     AttnBlock = functools.partial(layers.AttnBlock, normalize=normalize)
+    ResnetBlock = functools.partial(ResnetBlockDDPM, act=act, normalize=normalize, dropout=dropout)
 
     if config.model.conditional:
-      # Condition on noise levels.
-      ResnetBlock = functools.partial(ResnetBlockDDPM, act=act, normalize=normalize, dropout=dropout)
+      # timestep/scale embedding
+      timesteps = labels
+      temb = layers.get_timestep_embedding(timesteps, nf)
+      temb = nn.Dense(nf * 4, kernel_init=default_initializer())(temb)
+      temb = nn.Dense(nf * 4, kernel_init=default_initializer())(act(temb))
     else:
-      # Do not condition on noise levels explicitly.
-      ResnetBlock = functools.partial(ResnetBlockDDPM, act=act, normalize=normalize, dropout=dropout)
+      temb = None
 
     if config.data.centered:
       # Input is in [-1, 1]
