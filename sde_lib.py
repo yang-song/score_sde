@@ -98,14 +98,14 @@ class SDE(abc.ABC):
         score = score_fn(x, t)
         drift = drift - batch_mul(diffusion ** 2, score * (0.5 if self.probability_flow else 1.))
         # Set the diffusion function to zero for ODEs.
-        diffusion = 0. if self.probability_flow else diffusion
+        diffusion = jnp.zeros_like(diffusion) if self.probability_flow else diffusion
         return drift, diffusion
 
       def discretize(self, x, t):
         """Create discretized iteration rules for the reverse diffusion sampler."""
         f, G = discretize_fn(x, t)
         rev_f = f - batch_mul(G ** 2, score_fn(x, t) * (0.5 if self.probability_flow else 1.))
-        rev_G = 0. if self.probability_flow else G
+        rev_G = jnp.zeros_like(G) if self.probability_flow else G
         return rev_f, rev_G
 
     return RSDE()
