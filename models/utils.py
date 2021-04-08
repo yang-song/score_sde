@@ -110,7 +110,7 @@ def init_model(rng, config):
   """ Initialize a `flax.linen.Module` model. """
   model_name = config.model.name
   model_def = functools.partial(get_model(model_name), config=config)
-  input_shape = (jax.local_device_count(), config.data.image_size, config.data.image_size, 3)
+  input_shape = (jax.local_device_count(), config.data.image_size, config.data.image_size, config.data.num_channels)
   label_shape = input_shape[:1]
   fake_input = jnp.zeros(input_shape)
   fake_label = jnp.zeros(label_shape, dtype=jnp.int32)
